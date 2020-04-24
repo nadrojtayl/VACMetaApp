@@ -187,6 +187,7 @@ global.inputs = {
         selectedElemToStyle:-1, 
         editmode:true, 
         additionalStyle:{},
+        enteredName: "",
         clickfunctions: clickfunctions,
         name: undefined,
         ischildview: false,
@@ -361,21 +362,19 @@ global.inputs = {
 
 
 
-  componentDidMount(){
-    console.log(this.props)
-    if(!this.props.ischildview){
-      this.load();
-    }
-    
-  }
 
-  load(){
+
+  load(name){
+    alert(name);
+
     
     if(this.state.name === undefined){
+
      
-     var name = "six";    
-      this.setState({name})
+    
       var db_url = "https://streamedbooks.herokuapp.com/apps?name=" + name;
+     
+      
       var that = this;
        var schema = fetch(db_url, {
                   method: 'GET',
@@ -386,11 +385,13 @@ global.inputs = {
         }).then(async function(res){ 
           try {
           
-            res= await res.json();
+            res = await res.json();
+
             
+          
             if(res.length === 0){
-              alert("Couldn't find your app. Please refresh the page")
-              that.load();
+              alert("Couldn't find your app. Please try again")
+           
               return
             }
 
@@ -461,13 +462,13 @@ global.inputs = {
       
             
               
-              that.setState({pages: other_pages, clickfunctions: clickfunctions, childrenAdditionalStyles: firstpagestyle, children: firstpagechildren })
+              that.setState({name:name, pages: other_pages, clickfunctions: clickfunctions, childrenAdditionalStyles: firstpagestyle, children: firstpagechildren })
              
             
             
 
             } catch(e){
-              
+              alert(e)
             }
            
           
@@ -484,8 +485,23 @@ global.inputs = {
     render(){
       var that = this;
       // console.log("PAGE IS " + this.state.page);
-      console.log("RERENDERED")
+     
       // console.log(this.state.children)
+
+      if(that.state.name === undefined){
+        return (
+        <View style = {[{height:"100%", width:"100%", paddingTop:'5%', backgroundColor:"white", alignItems:'center', justifyContent:'center'},this.state.additionalStyle]}>
+         <Text style = {{textAlign:'center'}}>See your App!</Text>
+         <TextInput
+            style={{ height: 40, width:120, borderColor: 'gray', borderWidth: 1 }}
+            onChangeText={function(enteredName){that.setState({enteredName})}}
+            value={that.state.enteredName}
+          />
+          <Button title = "Go" onPress = {function(){that.load.bind(that)(that.state.enteredName) }}></Button>
+        </View>
+
+        )
+      }
 
 
       return (
