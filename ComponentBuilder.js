@@ -2,10 +2,30 @@ import React, { Component } from "react";
 import { Button, Picker, Image, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
 
 
-const window = {};
+const width = Dimensions.get('window').width;
+const height = Dimensions.get('window').height;
 global.inputs = {
   0:"This"
 }
+
+window = global;
+window.appData = {};
+global.updateAppData = function(name,val){
+  window.appData[name] = val;
+}
+
+global.edit_mode = false;
+global.drag_mode = false;
+global.try_eval = function(input){
+        try {
+          var output =  eval(input);
+          return output
+        } catch(e){
+          return undefined;
+
+        }
+       }
+
 
 
 
@@ -37,8 +57,11 @@ global.inputs = {
   
  
     additionalStyle = copy;
+    console.log(additionalStyle)
     Object.keys(additionalStyle).forEach(function(key){
-      if(additionalStyle[key].indexOf('elem') !== -1){
+      console.log(key);
+      if(typeof additionalStyle[key] === "string" && additionalStyle[key].indexOf('elem') !== -1){
+        console.log("PARSED");
         additionalStyle[key] = eval(additionalStyle[key])
       }
     })
@@ -96,56 +119,36 @@ global.inputs = {
   }
 
   goTo(pageName){
-    this.setState({page:pageName, 
-      children:this.state.pages[pageName].children, 
-      childrenAdditionalStyles: this.state.pages[pageName].childrenAdditionalStyles,
-      clickfunctions: this.state.pages[pageName].clickfunctions })
-  }
-
-  changePicker(name,ind){
     var that = this;
-
-    var value = prompt("What value do you want to give " + name
-      + "?")
-    console.log(name);
-    console.log("HEREN");
-    console.log(that.state.selectedElemToStyle)
-    if(name.indexOf("style:") !== -1){
-      name = name.replace("style:","")
-      if(!isNaN(parseInt(value))){
-        value = parseInt(value)
-      }
-      
-
-      if(parseInt(that.state.selectedElemToStyle) === -1){
-        that.state.additionalStyle[name] = value
-        this.setState({additionalStyle:that.state.additionalStyle})  
-
-      } else {
-        console.log("HERE2")
-        this.state.childrenAdditionalStyles[that.state.selectedElemToStyle][name] = value
-        console.log(this.state.childrenAdditionalStyles)
-        this.setState({childrenAdditionalStyles:that.state.childrenAdditionalStyles})  
-      }
-      return
-
-      
-    } else {
-
-      if(name === "onPress"){
-       
-        that.state.clickfunctions[that.state.selectedElemToStyle] = value;
-        that.setState({clickfunctions:that.state.clickfunctions})
-        return
-      }
-
-      this._element.setNativeProps({ name:value })
-    }
-    
+    this.setState({page: pageName, 
+      children:that.state.pages[pageName].children, 
+      childrenAdditionalStyles: that.state.pages[pageName].childrenAdditionalStyles,
+      clickfunctions: that.state.pages[pageName].clickfunctions })
   }
+
+
 
     render(){
       var that = this;
+
+      if(!window.edit_mode){
+        return (<View
+      style = {that.props.style}
+     
+      >
+        <ScrollView>
+          <View style = {{height:"1200px"}}>
+          {that.props.data.map(function(elem,ind){
+          
+            return that.renderElement(that.props.type,ind,that.props.style, that.props.clickfunction, elem)
+          }) }
+          </View>
+        </ScrollView>
+        </View>
+        )
+
+
+      }
      
       return (<TouchableOpacity 
       style = {that.props.style}
@@ -169,6 +172,8 @@ global.inputs = {
     constructor(props){
       super(props);
       window.FrontPage = this;
+      window.goTo = this.goTo.bind(this)
+      window.saveToDatabase = this.saveToDatabase.bind(this);
       if(this.props.ischildview){
         var children = this.props.children
         var childrenAdditionalStyles = this.props.childrenAdditionalStyles
@@ -180,53 +185,90 @@ global.inputs = {
       }
 
       this.state = { 
-        textTreeNode: this.props.textTreeNode === undefined ? window.dom_tree_head: this.props.textTreeNode, 
-        textTreeChildren:[],
-        children:children, 
         draggingObject: null,
         selectedElemToStyle:-1, 
         editmode:true, 
-        additionalStyle:{},
-        enteredName: "",
-        clickfunctions: clickfunctions,
+        color: "#784423",
         name: undefined,
         ischildview: false,
+        text_mode:false,
+        database:{},
         pages:{
           FirstPage:{
             children:[],
             additionalStyle:{},
             childrenAdditionalStyles:[],
-            clickfunctions:[]
+            clickfunctions:[],
+            page:"FirstPage"
           }
         },
         page:"FirstPage",
         childrenAdditionalStyles:childrenAdditionalStyles}
     }
 
+    async loadDatabase(){
+       var that = this;
+       var db_url = "https://streamedbooks.herokuapp.com/apps_data?app_name=" + this.state.name
+     
+       var database = {};
+       var schema = fetch(db_url, {
+                  method: 'GET',
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                  }
+        }).then(async function(res){ 
 
+         res= await res.json();
+         console.log(res)
 
-   update(element,attribute,value){
-    console.log("UPDATING")
-    var that = this;
-    var obj = {};
+          if(typeof res === "string"){
+            res = JSON.parse(res);
+          }
 
-    that.state.children.forEach(function(child,ind){
-      if(obj[child] === undefined){
-        obj[child] = 0
-      } else {
-        obj[child] = obj[child] + 1;
-      }
+          res.forEach(function(datum){
+            console.log(datum)
+            if(typeof datum.data === "string"){
+               datum.data = JSON.parse(datum.data);
+            }
+            if(database[datum.data_type] === undefined){
+               database[datum.data_type] = [datum]
+            } else {
+              database[datum.data_type].push(datum);
+            }
+          })
 
-      console.log(child + obj[child]);
+          window.database = database;
+         
+       
+        
+          that.setState({database:database})
+        })
 
-      if((child + obj[child]) === element){
-        that.state.childrenAdditionalStyles[ind][attribute] = value;
-        that.setState({childrenAdditionalStyles:that.state.childrenAdditionalStyles})
-      }
+    }
 
-    })
+    saveToDatabase(data_type,data){
+      var that = this;
+      var body = JSON.stringify({app_name:that.state.name,data_type:data_type,data:data})
+      var db_url = 'https://streamedbooks.herokuapp.com/apps_data'
+      var schema = fetch(db_url, {
+                  method: 'POST',
+                  body:body,
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                  }
+        }).then(async function(res){
+          console.log("SAVED");
+          await that.loadDatabase.bind(that)();
+          that.forceUpdate();
+         
+           
+        })
+    }
 
-   }
+    
+
 
    renderElement(name,int, childrenAdditionalStyles, clickfunctions){
 
@@ -234,34 +276,39 @@ global.inputs = {
     
     int = parseInt(int)
     if(name === "text"){
-      // alert("Added")
-      console.log("TEXTEN");
-      console.log(that.state.childrenAdditionalStyles[int])
+  
       return (
         <Text
           className = "input_class"
           ref={component => this._element = component}
           defaultValue = "Heren"
-          style={[{position:'absolute',top:0,left:0, width:"100%", backgroundColor:'white', borderColor: 'gray', borderWidth: 1}, that.state.childrenAdditionalStyles[int]]}
+          style={[{position:'absolute',top:0,left:0, width:"100%", backgroundColor:'white', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
           maxLength = {5}
-          onPress = { function(){if(window.drag_mode){console.log("CLICKED" + int); that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.clickfunctions[int] + ')()'); if(that.state.clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){if(window.drag_mode){console.log("CLICKED" + int); that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
-          textTreeNode = {this.state.textTreeChildren[int]}
           selectable = {true}
-        >{  window.try_eval(that.state.childrenAdditionalStyles[int].innerText) === undefined ? ("undefined"):  window.try_eval(that.state.childrenAdditionalStyles[int].innerText) }</Text>
+        >{  window.try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) === undefined ? ("undefined"):  window.try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) }</Text>
 
         )
     }
 
     if(name === "picker"){
-      var options = that.state.childrenAdditionalStyles[int]['options'] !== undefined ? that.state.childrenAdditionalStyles[int]['options']:[];
+      var options = that.state.pages[that.state.page].childrenAdditionalStyles[int]['options'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['options']:["example"];
+      console.log(options);
+      console.log(typeof options);
+      console.log(Array.isArray(options))
+      
       options = eval(options)
-   
-      return(
+      options.forEach(function(option,ind){
+        options[ind] = option.toString();
+      })
+    
+      
+   return(
       <Picker
         selectedValue={window.appData["input" + int]}
-        style = {[{height:50,width:150}, that.state.childrenAdditionalStyles[int]]}
-        onValueChange = { function(value){ if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.clickfunctions[int] + ')()'); window.updateAppData('picker' + int, value);  if(that.state.clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+        style = {[{height:50,width:150}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        onValueChange = { function(value){console.log("HRENRE");console.log(that.state.pages);  eval('(' + that.state.pages[that.state.page].clickfunctions[int] !== undefined ? that.state.pages[that.state.page].clickfunctions[int]:"function(){}" + ')()'); window.updateAppData(that.state.page + 'picker' + int, value);  if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
       >
         <Picker.Item label={"Select"} value={"Select"} />
         <Picker.Item label={"Option1"} value={"Option1"} />
@@ -276,30 +323,30 @@ global.inputs = {
     }
 
     if(name === "repeater"){
-      var options = that.state.childrenAdditionalStyles[int]['options'] !== undefined ? that.state.childrenAdditionalStyles[int]['options']:["example"];
+      var options = that.state.pages[that.state.page].childrenAdditionalStyles[int]['options'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['options']:["example"];
       options = eval(options)
 
       return(
       <Multiplier
-      style = {[{alignItems:'center'}, that.state.childrenAdditionalStyles[int]]}
-      type = {that.state.childrenAdditionalStyles[int]["style:repeaterType"] === undefined ? ("text"): (that.state.childrenAdditionalStyles[int]["style:repeaterType"]) }
+      style = {[{alignItems:'center'}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+      type = {that.state.pages[that.state.page].childrenAdditionalStyles[int]["style:repeaterType"] === undefined ? ("text"): (that.state.pages[that.state.page].childrenAdditionalStyles[int]["style:repeaterType"]) }
       data = {options}
       int = {int}
       parent = {that}
-      clickfunction = {that.state.clickfunctions[int]}
+      clickfunction = {that.state.pages[that.state.page].clickfunctions[int]}
       >
       </Multiplier>
       )
     }
 
     if(name === "image"){
-      var uri = that.state.childrenAdditionalStyles[int]['source'] !== undefined ? that.state.childrenAdditionalStyles[int]['source']:"https://i.imgur.com/89iERyb.png";
+      var uri = that.state.pages[that.state.page].childrenAdditionalStyles[int]['source'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['source']:"https://i.imgur.com/89iERyb.png";
       return(
         <TouchableOpacity
-        onPress = { function(){ if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.clickfunctions[int] + ')()'); if(that.state.clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+        onPress = { function(){ if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
         >
       <Image
-        style={[{ width:"50%", height:"50%"}, that.state.childrenAdditionalStyles[int]]}
+        style={[{ width:'200px', height:'200px'}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
         source = {{uri:uri}}
       >
       </Image>
@@ -311,8 +358,8 @@ global.inputs = {
      
       return(
       <TextInput
-        style={[{position:'absolute',top:0,left:0, height: 40, borderColor: 'gray', borderWidth: 1}, that.state.childrenAdditionalStyles[int]]}
-        onChangeText={function(val){window.updateAppData("input" + int,val); that.setState({children:that.state.children})}}
+        style={[{position:'absolute',top:0,left:0, height: 40, borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        onChangeText={function(val){window.updateAppData(that.state.page + "input" + int,val); that.forceUpdate(); }}
         value={window.appData["input" + int]}
         onFocus = {function(){ if(window.drag_mode){that.setState({selectedElemToStyle:int})} if(window.edit_mode){window.edit(int)}  } }
       />
@@ -324,11 +371,10 @@ global.inputs = {
        <TouchableOpacity
           className = "input_class"
           ref={component => this._element = component}
-          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.clickfunctions[int] + ')()'); if(that.state.clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
-          textTreeNode = {this.state.textTreeChildren[int]}
-          style={[{position:'absolute',top:0,left:0, height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.childrenAdditionalStyles[int]]}
-        ><Text> { that.state.childrenAdditionalStyles[int]['innerText'] === undefined ? ("undefined"):that.state.childrenAdditionalStyles[int]['innerText'] }</Text> 
+          style={[{position:'absolute',top:0,left:0, height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        ><Text> { that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] === undefined ? ("undefined"):that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] }</Text> 
         </TouchableOpacity>
       )
     }
@@ -338,9 +384,8 @@ global.inputs = {
         <TouchableOpacity
           className = "input_class"
           ref={component => this._element = component}
-          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.clickfunctions[int] + ')()'); if(that.state.clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
-          textTreeNode = {this.state.textTreeChildren[int]}
           style={[{zIndex:-100, position:'absolute',top:0,left:0, height: 40, width:"10%", title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.childrenAdditionalStyles[int]]}
         > 
         </TouchableOpacity>
@@ -348,33 +393,54 @@ global.inputs = {
         )
     }
 
+   
   }
 
   goTo(pageName){
-    // console.
-    this.setState({page:pageName, 
-      children:this.state.pages[pageName].children, 
-      childrenAdditionalStyles: this.state.pages[pageName].childrenAdditionalStyles,
-      clickfunctions: this.state.pages[pageName].clickfunctions })
+    var that = this;
+   
+    try {
+      that.setState({page:pageName})
+    } catch(e){
+      console.log(e)
+    }
   }
 
   
-
-
-
-
-
-  load(name){
-    alert(name);
-
+  componentDidMount(){
+  
+    if(!this.props.ischildview){
+      this.load();  
+    }
     
+  }
+
+  load(){
+  
     if(this.state.name === undefined){
+      if(window.app_name !== undefined){
+        
+        var name = window.app_name;
+     
+      } else {
+         var name = "testapp"
 
-     
-    
-      var db_url = "https://streamedbooks.herokuapp.com/apps?name=" + name;
-     
+         if(name === "new"){
+          var name = prompt ("OK. What do you want to call your app?");
+          this.setState({name})
+          return
+        }
+
+      }
       
+   
+      
+      
+      this.setState({name},function(){
+        that.loadDatabase.bind(that)()
+      })
+      
+      var db_url = "https://streamedbooks.herokuapp.com/apps?name=" + name;
       var that = this;
        var schema = fetch(db_url, {
                   method: 'GET',
@@ -384,14 +450,13 @@ global.inputs = {
                   }
         }).then(async function(res){ 
           try {
-          
-            res = await res.json();
-
-            
-          
-            if(res.length === 0){
-              alert("Couldn't find your app. Please try again")
            
+            res= await res.json();
+            console.log(res)
+            
+            if(res.length === 0){
+              alert("Couldn't find your app. Please refresh the page")
+              that.load();
               return
             }
 
@@ -399,6 +464,7 @@ global.inputs = {
             var firstpagechildren;
             var firstpagestyle;
             var clickfunctions;
+            var pages = {};
             
 
 
@@ -408,7 +474,7 @@ global.inputs = {
               }
 
               if(typeof res.appdata === "string"){
-              
+               
                 res.appdata = JSON.parse(res.appdata);
               
               }
@@ -421,14 +487,19 @@ global.inputs = {
               if(typeof res.clickfunctions === "string"){
                 res.clickfunctions = JSON.parse(res.clickfunctions)
               }
-            
-               that.setState({childrenAdditionalStyles: res.childrenAdditionalStyles, clickfunctions: res.clickfunctions, children: res.children })
+
+              pages["FirstPage"].clickfunctions = res.clickfunctions;
+              pages["FirstPage"].children = res.children;
+              pages["FirstPage"].childrenAdditionalStyles = res.childrenA;
+              
+               window.appData = res.appdata;
+               that.setState({pages:pages})
               return
             }
 
             res.forEach(function(page){
 
-
+              
             if(typeof page.app_styles === "string"){
               page.childrenAdditionalStyles = JSON.parse(page.app_styles)
             }
@@ -442,33 +513,24 @@ global.inputs = {
             }
 
              if(typeof page.appdata === "string"){
-              page.appdata = JSON.parse(page.appdata)
-            }
+                page.appdata = JSON.parse(page.appdata)
+              }
 
-              if(page.page === "FirstPage"){
-                firstpagechildren = page.children
-                firstpagestyle = page.childrenAdditionalStyles
-                clickfunctions = page.clickfunctions;
-                
-                other_pages[page.page] = page;
-               // that.setState({childrenAdditionalStyles: page.childrenAdditionalStyles, children: page.children })
-              } else {
-                other_pages[page.page] = page;
-              } 
-
+              other_pages[page.page] = page;
             })
 
              
       
             
               
-              that.setState({name:name, pages: other_pages, clickfunctions: clickfunctions, childrenAdditionalStyles: firstpagestyle, children: firstpagechildren })
+              that.setState({pages: other_pages})
              
             
             
 
             } catch(e){
-              alert(e)
+              console.log(e)
+              console.log('couldnt load')
             }
            
           
@@ -479,38 +541,16 @@ global.inputs = {
   }
 
 
-
-
-
     render(){
       var that = this;
-      // console.log("PAGE IS " + this.state.page);
-     
-      // console.log(this.state.children)
-
-      if(that.state.name === undefined){
-        return (
-        <View style = {[{height:"100%", width:"100%", paddingTop:'5%', backgroundColor:"white", alignItems:'center', justifyContent:'center'},this.state.additionalStyle]}>
-         <Text style = {{textAlign:'center'}}>See your App!</Text>
-         <TextInput
-            style={{ height: 40, width:120, borderColor: 'gray', borderWidth: 1 }}
-            onChangeText={function(enteredName){that.setState({enteredName})}}
-            value={that.state.enteredName}
-          />
-          <Button title = "Go" onPress = {function(){that.load.bind(that)(that.state.enteredName) }}></Button>
-        </View>
-
-        )
-      }
-
 
       return (
-        <View style = {[{height:"100%", width:"100%", paddingTop:'5%', backgroundColor:"#784423"},this.state.additionalStyle]}>
+        <View style = {[{height:"100%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
         {
-          that.state.children.map(function(elem_name,index){
-            return that.renderElement(elem_name, index)
-          })
-        }
+          that.state.pages[that.state.page].children.map(function(elem_name,index){
+          return that.renderElement(elem_name, index)
+        })
+      }
         </View>
 
         )
@@ -526,16 +566,103 @@ class FrontPage extends React.Component {
     this.state = {generatedElementStyleObject:{}, generatedElementType:"text", buttonTitle:""}
   }
 
+
+
+  renderElement(){
+    console.log("YELLEN")
+    console.log(this.state.generatedElementType)
+    var that = this;
+    if(this.state.generatedElementType === "text"){
+      return (
+        <Text
+          className = "input_class"
+          ref={component => this._element = component}
+          defaultValue = "Heren"
+          style={[{ height: 40, borderColor: 'gray', borderWidth: 1},that.state.generatedElementStyleObject]}
+          maxLength = {5}
+          selectable = {true}
+        >THIS IS THE TEST</Text>
+
+        )
+    }
+
+    if(this.state.generatedElementType === "button"){
+      return (
+       <Button
+          className = "input_class"
+          ref={component => this._element = component}
+          onPress = {function(){}}
+          title = {that.state.buttonTitle === "" ? ("Button"):(this.state.buttonTitle)}
+          style={[{ height: 40, borderColor: 'gray', borderWidth: 1},that.state.generatedElementStyleObject]}
+        >THIS IS THE TEST</Button>
+      )
+    }
+  }
+
+  _handlePress() {
+    console.log("HERE")
+    // this._element.setNativeProps({ style:{backgroundColor:'red'} })
+    this.setState({generatedElementStyleObject:{backgroundColor:'red'}})  
+  }
+
+  changePicker(name,ind){
+    var that = this;
+
+    var value = prompt("What value do you want to give " + name
+      + "?")
+    console.log(name);
+    if(name.indexOf("style:") !== -1){
+      name = name.replace("style:","")
+      if(!isNaN(parseInt(value))){
+        value = parseInt(value)
+      }
+      that.state.generatedElementStyleObject[name] = value
+      
+
+      this.setState({generatedElementStyleObject:that.state.generatedElementStyleObject})  
+    } else {
+      if(this.state.generatedElementType === "button"){
+        if(name === "title"){
+          this.setState({buttonTitle:value})
+        }
+        return
+      }
+
+      this._element.setNativeProps({ name:value })
+    }
+    
+  }
+
   render() {
     var that = this;
     return (
-      <View style = {{width:"100%",height:"100%"}}>
-
+      <View style = {{width:"100%", marginTop:"15%", height:"100%"}}>
         <BuilderComponent ischildview = {false}></BuilderComponent>
       </View>
      )
   }
 }
 
+const styles = StyleSheet.create({
+  app: {
+    height:height,
+    width:width,
+    backgroundColor:"grey",
+    marginTop:height*0.05,
+    alignItems:'center'
+  },
+  logo: {
+    height: 80
+  },
+  header: {
+    padding: 20
+  },
+  link: {
+    color: "#1B95E0"
+  },
+  code: {
+    fontFamily: "monospace, monospace"
+  }
+});
 
 export default FrontPage;
