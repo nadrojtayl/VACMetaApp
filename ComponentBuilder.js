@@ -433,7 +433,7 @@ global.try_eval = function(input){
               
             if(res.length === 0){
               alert("Couldn't find your app. Please refresh the page")
-              that.load();
+              that.setState({name:undefined});
               return
             }
 
