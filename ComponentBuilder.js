@@ -190,6 +190,7 @@ global.try_eval = function(input){
         editmode:true, 
         color: "#784423",
         name: undefined,
+        enteredName:"",
         ischildview: false,
         text_mode:false,
         database:{},
@@ -407,40 +408,16 @@ global.try_eval = function(input){
   }
 
   
-  componentDidMount(){
   
-    if(!this.props.ischildview){
-      this.load();  
-    }
-    
-  }
 
   load(){
   
-    if(this.state.name === undefined){
-      if(window.app_name !== undefined){
-        
-        var name = window.app_name;
-     
-      } else {
-         var name = "testapp"
-
-         if(name === "new"){
-          var name = prompt ("OK. What do you want to call your app?");
-          this.setState({name})
-          return
-        }
-
-      }
-      
    
+      var that = this;
       
+       
       
-      this.setState({name},function(){
-        that.loadDatabase.bind(that)()
-      })
-      
-      var db_url = "https://streamedbooks.herokuapp.com/apps?name=" + name;
+      var db_url = "https://streamedbooks.herokuapp.com/apps?name=" + that.state.name;
       var that = this;
        var schema = fetch(db_url, {
                   method: 'GET',
@@ -450,10 +427,10 @@ global.try_eval = function(input){
                   }
         }).then(async function(res){ 
           try {
-           
+         
             res= await res.json();
-            console.log(res)
-            
+         
+              
             if(res.length === 0){
               alert("Couldn't find your app. Please refresh the page")
               that.load();
@@ -494,6 +471,9 @@ global.try_eval = function(input){
               
                window.appData = res.appdata;
                that.setState({pages:pages})
+                this.setState({name:that.state.name},function(){
+                  that.loadDatabase.bind(that)()
+                })
               return
             }
 
@@ -522,7 +502,7 @@ global.try_eval = function(input){
              
       
             
-              
+           
               that.setState({pages: other_pages})
              
             
@@ -538,14 +518,32 @@ global.try_eval = function(input){
     }
     
     
-  }
+  
 
 
     render(){
       var that = this;
+      if(that.state.name === undefined){
+        return (
+        <View style = {[{height:"100%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
+        <Text>Enter your app Name</Text>
+        <TextInput
+            style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+            onChangeText={function(enteredName){that.setState({enteredName})}}
+            value={that.state.enteredName}
+          />
+          <Button title = "Go" onPress = {function(){
+            that.setState({name:that.state.enteredName},function(){
+              that.load();
+            })
+          }}></Button>
+        </View>
+      )
+    }
+   
 
       return (
-        <View style = {[{height:"100%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
+        <View style = {[{height:"100%", paddingTop:"10%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
         {
           that.state.pages[that.state.page].children.map(function(elem_name,index){
           return that.renderElement(elem_name, index)
@@ -636,7 +634,7 @@ class FrontPage extends React.Component {
   render() {
     var that = this;
     return (
-      <View style = {{width:"100%", marginTop:"15%", height:"100%"}}>
+      <View style = {{width:"100%", height:"100%"}}>
         <BuilderComponent ischildview = {false}></BuilderComponent>
       </View>
      )

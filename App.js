@@ -23,38 +23,10 @@ class App extends Component {
   render() {
     var that = this;
 
-    console.log("here")
-
-    if(that.state.destination === "FrontPage"){
-      return (<View style = {{width:"100%",height:"100%"}}>
-        <FrontPage parent = {this}></FrontPage></View>)
-     } 
-
-     if(that.state.destination === "SecondPage"){
-       return (<View style = {{width:"100%",height:"100%"}}>
-        <SecondPage parent = {this}></SecondPage></View>)
-     }
-
-      if(that.state.destination === "ThirdPage"){
-       return (<View style = {{width:"100%",height:"100%"}}>
-        <ThirdPage parent = {this}></ThirdPage></View>)
-     }
-
-
-     if(that.state.destination === "CollectInfo"){
-       return (<View style = {{width:"100%",height:"100%"}}>
-        <CollectInfo parent = {this}></CollectInfo></View>)
-     }
-
-     if(that.state.destination === "DisplayInfo"){
-       return (<View style = {{width:"100%",height:"100%"}}>
-        <DisplayInfo parent = {this}></DisplayInfo></View>)
-     }
-
-     if(that.state.destination === "ComponentBuilder"){
-       return (<View style = {{width:"100%",height:"100%"}}>
-        <ComponentBuilder parent = {this}></ComponentBuilder></View>)
-     }
+       return (<View >
+        <ComponentBuilder parent = {this}></ComponentBuilder>
+        </View>)
+     
 
   }
 }
