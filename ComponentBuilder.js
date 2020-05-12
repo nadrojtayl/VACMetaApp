@@ -285,7 +285,7 @@ global.try_eval = function(input){
           defaultValue = "Heren"
           style={[{position:'absolute',top:0,left:0, width:"100%", backgroundColor:'white', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
           maxLength = {5}
-          onPress = { function(){if(window.drag_mode){console.log("CLICKED" + int); that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){if(window.drag_mode){console.log("CLICKED" + int); that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
           selectable = {true}
         >{  window.try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) === undefined ? ("undefined"):  window.try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) }</Text>
@@ -344,7 +344,7 @@ global.try_eval = function(input){
       var uri = that.state.pages[that.state.page].childrenAdditionalStyles[int]['source'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['source']:"https://i.imgur.com/89iERyb.png";
       return(
         <TouchableOpacity
-        onPress = { function(){ if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+        onPress = { function(){ if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
         >
       <Image
         style={[{ width:'200px', height:'200px'}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
@@ -372,7 +372,7 @@ global.try_eval = function(input){
        <TouchableOpacity
           className = "input_class"
           ref={component => this._element = component}
-          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
           style={[{position:'absolute',top:0,left:0, height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
         ><Text> { that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] === undefined ? ("undefined"):that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] }</Text> 
@@ -501,7 +501,7 @@ global.try_eval = function(input){
 
              
       
-            
+              window.appData = res[0].appdata;
            
               that.setState({pages: other_pages})
              
