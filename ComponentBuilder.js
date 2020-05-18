@@ -9,6 +9,19 @@ global.inputs = {
 }
 
 window = global;
+
+function try_eval(input){
+ 
+    try {
+      var output =  eval(input);
+      return output
+    } catch(e){
+      return input;
+    }
+}
+
+
+
 window.appData = {};
 global.updateAppData = function(name,val){
   window.appData[name] = val;
@@ -41,13 +54,10 @@ global.try_eval = function(input){
 
   renderElement(name,int, additionalStyle, clickfunctions,elem){
     var that = this;
-    console.log(additionalStyle)
     
     var copy = {};
     additionalStyle.forEach(function(obj,ind){
-      // console.log(obj);
       Object.keys(obj).forEach(function(key){
-        console.log(key)
         if(key !== undefined && key.indexOf("repeater") !== -1){
           copy[key.replace("repeater","")] = obj[key];
         }
@@ -57,11 +67,8 @@ global.try_eval = function(input){
   
  
     additionalStyle = copy;
-    console.log(additionalStyle)
     Object.keys(additionalStyle).forEach(function(key){
-      console.log(key);
       if(typeof additionalStyle[key] === "string" && additionalStyle[key].indexOf('elem') !== -1){
-        console.log("PARSED");
         additionalStyle[key] = eval(additionalStyle[key])
       }
     })
@@ -152,7 +159,7 @@ global.try_eval = function(input){
      
       return (<TouchableOpacity 
       style = {that.props.style}
-      onPress = { function(){if(window.drag_mode){ that.setState({selectedElemToStyle:that.props.int});  return} if(window.edit_mode){ console.log("IND" + that.props.int); window.edit(that.props.int); return}  eval('(' + that.state.clickfunctions[that.props.int] + ')()'); if(that.state.clickfunctions[that.props.int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+      onPress = { function(){if(window.drag_mode){ that.setState({selectedElemToStyle:that.props.int});  return} if(window.edit_mode){  window.edit(that.props.int); return}  eval('(' + that.state.clickfunctions[that.props.int] + ')()'); if(that.state.clickfunctions[that.props.int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
 
       >
         <ScrollView>
@@ -188,7 +195,7 @@ global.try_eval = function(input){
         draggingObject: null,
         selectedElemToStyle:-1, 
         editmode:true, 
-        color: "#784423",
+        color: "white",
         name: undefined,
         enteredName:"",
         ischildview: false,
@@ -221,14 +228,14 @@ global.try_eval = function(input){
         }).then(async function(res){ 
 
          res= await res.json();
-         console.log(res)
+ 
 
           if(typeof res === "string"){
             res = JSON.parse(res);
           }
 
           res.forEach(function(datum){
-            console.log(datum)
+         
             if(typeof datum.data === "string"){
                datum.data = JSON.parse(datum.data);
             }
@@ -260,7 +267,7 @@ global.try_eval = function(input){
                     "Accept": "application/json"
                   }
         }).then(async function(res){
-          console.log("SAVED");
+          
           await that.loadDatabase.bind(that)();
           that.forceUpdate();
          
@@ -272,8 +279,8 @@ global.try_eval = function(input){
 
 
    renderElement(name,int, childrenAdditionalStyles, clickfunctions){
-
     var that = this;
+    console.log(that.state.pages[that.state.page].childrenAdditionalStyles[int])
     
     int = parseInt(int)
     if(name === "text"){
@@ -285,19 +292,17 @@ global.try_eval = function(input){
           defaultValue = "Heren"
           style={[{position:'absolute',top:0,left:0, width:"100%", backgroundColor:'white', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
           maxLength = {5}
-          onPress = { function(){if(window.drag_mode){console.log("CLICKED" + int); that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
           selectable = {true}
-        >{  window.try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) === undefined ? ("undefined"):  window.try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) }</Text>
+        >{  try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) === undefined ? ("undefined"):  try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) }</Text>
 
         )
     }
 
     if(name === "picker"){
       var options = that.state.pages[that.state.page].childrenAdditionalStyles[int]['options'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['options']:["example"];
-      console.log(options);
-      console.log(typeof options);
-      console.log(Array.isArray(options))
+
       
       options = eval(options)
       options.forEach(function(option,ind){
@@ -309,7 +314,7 @@ global.try_eval = function(input){
       <Picker
         selectedValue={window.appData["input" + int]}
         style = {[{height:50,width:150}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
-        onValueChange = { function(value){console.log("HRENRE");console.log(that.state.pages);  eval('(' + that.state.pages[that.state.page].clickfunctions[int] !== undefined ? that.state.pages[that.state.page].clickfunctions[int]:"function(){}" + ')()'); window.updateAppData(that.state.page + 'picker' + int, value);  if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+        onValueChange = { function(value){  eval('(' + that.state.pages[that.state.page].clickfunctions[int] !== undefined ? that.state.pages[that.state.page].clickfunctions[int]:"function(){}" + ')()'); window.updateAppData(that.state.page + 'picker' + int, value);  if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
       >
         <Picker.Item label={"Select"} value={"Select"} />
         <Picker.Item label={"Option1"} value={"Option1"} />
@@ -344,10 +349,10 @@ global.try_eval = function(input){
       var uri = that.state.pages[that.state.page].childrenAdditionalStyles[int]['source'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['source']:"https://i.imgur.com/89iERyb.png";
       return(
         <TouchableOpacity
-        onPress = { function(){ if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+        onPress = { function(){ if(window.edit_mode){  window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
         >
       <Image
-        style={[{ width:'200px', height:'200px'}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        style={[{ width:"20%", height:"20%"}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
         source = {{uri:uri}}
       >
       </Image>
@@ -372,7 +377,7 @@ global.try_eval = function(input){
        <TouchableOpacity
           className = "input_class"
           ref={component => this._element = component}
-          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
           style={[{position:'absolute',top:0,left:0, height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
         ><Text> { that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] === undefined ? ("undefined"):that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] }</Text> 
@@ -385,7 +390,7 @@ global.try_eval = function(input){
         <TouchableOpacity
           className = "input_class"
           ref={component => this._element = component}
-          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ console.log("IND" + int); window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){  window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
           style={[{zIndex:-100, position:'absolute',top:0,left:0, height: 40, width:"10%", title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.childrenAdditionalStyles[int]]}
         > 
@@ -525,8 +530,9 @@ global.try_eval = function(input){
       var that = this;
       if(that.state.name === undefined){
         return (
-        <View style = {[{height:"100%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
-        <Text>Enter your app Name</Text>
+        <View style = {[{height:"100%", width:"100%",  borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
+        <Text style = {{marginTop: "40%", textAlign:'center', color:'darkblue', fontSize:"84px"}}>V</Text>
+        <Text style = {{marginTop: "10%", textAlign:'center', color:'black'}}>Enter your app Name</Text>
         <TextInput
             style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
             onChangeText={function(enteredName){that.setState({enteredName})}}
@@ -567,8 +573,7 @@ class FrontPage extends React.Component {
 
 
   renderElement(){
-    console.log("YELLEN")
-    console.log(this.state.generatedElementType)
+    
     var that = this;
     if(this.state.generatedElementType === "text"){
       return (
@@ -598,7 +603,7 @@ class FrontPage extends React.Component {
   }
 
   _handlePress() {
-    console.log("HERE")
+    
     // this._element.setNativeProps({ style:{backgroundColor:'red'} })
     this.setState({generatedElementStyleObject:{backgroundColor:'red'}})  
   }
@@ -608,7 +613,7 @@ class FrontPage extends React.Component {
 
     var value = prompt("What value do you want to give " + name
       + "?")
-    console.log(name);
+   
     if(name.indexOf("style:") !== -1){
       name = name.replace("style:","")
       if(!isNaN(parseInt(value))){
