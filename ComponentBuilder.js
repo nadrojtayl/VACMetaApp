@@ -462,7 +462,7 @@ global.try_eval = function(input){
             var firstpagestyle;
             var clickfunctions;
             var pages = {};
-            
+            console.log(JSON.stringify(res));
 
 
             if(res.forEach === undefined){
@@ -502,6 +502,13 @@ global.try_eval = function(input){
               
             if(typeof page.app_styles === "string"){
               page.childrenAdditionalStyles = JSON.parse(page.app_styles)
+              page.childrenAdditionalStyles.forEach(function(styleobj){
+                Object.keys(styleobj).forEach(function(key){
+                  if(key === "fontFamily" && typeof styleobj[key] === "number"){
+                    delete styleobj["fontFamily"]
+                  }
+                })
+              })
             }
 
             if(typeof page.clickfunctions === "string"){
@@ -522,6 +529,7 @@ global.try_eval = function(input){
              
       
               window.appData = res[0].appdata;
+
            
               that.setState({pages: other_pages})
              
