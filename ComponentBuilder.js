@@ -92,16 +92,16 @@ global.try_eval = function(input){
 
       return (
         <Text
-          className = "input_class"
+     
           ref={component => this._element = component}
-          defaultValue = "Heren"
+       
           style={[{ height: 40, borderColor: 'gray', borderWidth: 1}, additionalStyle]}
           maxLength = {5}
           key = {int}
           onPress = { function(){  eval('(' + that.props.clickfunction + ')()')   } }
           textTreeNode = {this.state.textTreeChildren[int]}
           selectable = {true}
-        >{  additionalStyle.innerText === undefined ? ("undefined"):additionalStyle.innerText }</Text>
+        >{  additionalStyle.innerText === undefined ? elem:additionalStyle.innerText }</Text>
 
         )
     }
@@ -118,6 +118,22 @@ global.try_eval = function(input){
           textTreeNode = {this.state.textTreeChildren[int]}
           style={[{ height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, additionalStyle[int]]}
         >{ additionalStyle['innerText'] === undefined ? ("undefined"):additionalStyle['innerText'] }</Button>
+     
+      )
+    }
+
+    if(name === "image"){
+      return(
+       <Button
+          className = "input_class"
+          ref={component => this._element = component}
+          onPress = { function(){  eval('(' + that.prop.clickfunction + ')()')   } }
+          title = {additionalStyle['title'] === undefined ? ("undefined"):additionalStyle['title']}
+          key = {int}
+          textTreeNode = {this.state.textTreeChildren[int]}
+          style={[{ height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, additionalStyle[int]]}
+        >{ additionalStyle['innerText'] === undefined ? ("undefined"):additionalStyle['innerText'] }</Button>
+     
       )
     }
 
@@ -144,9 +160,9 @@ global.try_eval = function(input){
      
       >
         <ScrollView>
-          <View style = {{height:"1200px"}}>
+          <View >
           {that.props.data.map(function(elem,ind){
-          
+       
             return that.renderElement(that.props.type,ind,that.props.style, that.props.clickfunction, elem)
           }) }
           </View>
@@ -164,6 +180,8 @@ global.try_eval = function(input){
       >
         <ScrollView>
           {that.props.data.map(function(elem,ind){
+            console.log("elem" + elem) 
+      
           
             return that.renderElement(that.props.type,ind,that.props.style, that.props.clickfunction, elem)
           }) }
@@ -330,6 +348,7 @@ global.try_eval = function(input){
 
     if(name === "repeater"){
       var options = that.state.pages[that.state.page].childrenAdditionalStyles[int]['options'] !== undefined ? that.state.pages[that.state.page].childrenAdditionalStyles[int]['options']:["example"];
+      
       options = eval(options)
 
       return(
@@ -532,7 +551,7 @@ global.try_eval = function(input){
         return (
         <View style = {[{height:"100%", width:"100%",  borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
         <Text style = {{marginTop: "40%", textAlign:'center', color:'darkblue', fontSize:"84px"}}>V</Text>
-        <Text style = {{marginTop: "10%", textAlign:'center', color:'black'}}>Enter your app Name</Text>
+        <Text style = {{marginTop: "10%", textAlign:'center', color:'black'}}>Enter your app name</Text>
         <TextInput
             style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
             onChangeText={function(enteredName){that.setState({enteredName})}}
