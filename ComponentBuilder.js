@@ -124,15 +124,11 @@ global.try_eval = function(input){
 
     if(name === "image"){
       return(
-       <Button
-          className = "input_class"
-          ref={component => this._element = component}
-          onPress = { function(){  eval('(' + that.prop.clickfunction + ')()')   } }
-          title = {additionalStyle['title'] === undefined ? ("undefined"):additionalStyle['title']}
+       <Image
+          source = {{uri: additionalStyle['source'] === undefined ? ("https://i.imgur.com/89iERyb.png"):additionalStyle['source']}}
           key = {int}
-          textTreeNode = {this.state.textTreeChildren[int]}
           style={[{ height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, additionalStyle[int]]}
-        >{ additionalStyle['innerText'] === undefined ? ("undefined"):additionalStyle['innerText'] }</Button>
+        ></Image>
      
       )
     }
