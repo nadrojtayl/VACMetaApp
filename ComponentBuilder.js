@@ -379,7 +379,7 @@ global.try_eval = function(input){
      
       return(
       <TextInput
-        style={[{position:'absolute',top:0,left:0, height: 40, borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        style={[{position:'absolute',top:0,left:0, height: 40, width:"50%", borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
         onChangeText={function(val){window.updateAppData(that.state.page + "input" + int,val); that.forceUpdate(); }}
         value={window.appData["input" + int]}
         onFocus = {function(){ if(window.drag_mode){that.setState({selectedElemToStyle:int})} if(window.edit_mode){window.edit(int)}  } }
