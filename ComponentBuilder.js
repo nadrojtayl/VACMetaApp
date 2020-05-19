@@ -68,7 +68,7 @@ global.try_eval = function(input){
  
     additionalStyle = copy;
     Object.keys(additionalStyle).forEach(function(key){
-      if(typeof additionalStyle[key] === "string" && additionalStyle[key].indexOf('elem') !== -1){
+      if(key !== "onPress" && typeof additionalStyle[key] === "string" && (additionalStyle[key].indexOf('elem') !== -1  || additionalStyle[key].indexOf('width') !== -1 || additionalStyle[key].indexOf('height') !== -1 ) ){
         additionalStyle[key] = eval(additionalStyle[key])
       }
     })
@@ -366,11 +366,11 @@ global.try_eval = function(input){
         <TouchableOpacity
         onPress = { function(){ if(window.edit_mode){  window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
         >
-      <Image
-        style={[{ width:"20%", height:"20%"}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
-        source = {{uri:uri}}
-      >
-      </Image>
+          <Image
+            style={[{ width:"50%", height:"50%"}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+            source = {{uri:uri}}
+          >
+          </Image>
       </TouchableOpacity>
       )
     }
