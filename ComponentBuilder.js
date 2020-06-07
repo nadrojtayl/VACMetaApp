@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { Button, Picker, Switch, Image,ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
-
+import { Button, Picker, Switch,Image,ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
+import {WebView} from 'react-native-webview'
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -667,7 +667,7 @@ global.try_eval = function(input){
             onChangeText={function(enteredName){that.setState({enteredName})}}
             value={that.state.enteredName}
           />
-          <Button title = "Test My App" onPress = {function(){
+          <Button title = "Test the App" onPress = {function(){
             that.setState({name:that.state.enteredName},function(){
               that.load();
             })
