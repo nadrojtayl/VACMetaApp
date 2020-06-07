@@ -10,6 +10,15 @@ global.inputs = {
 
 window = global;
 
+function unwrap_dynamically(value,default_value){
+  if(default_value === undefined){
+    default_value = "undefined"
+  }
+  return try_eval(value) === undefined ? (default_value):  try_eval(value) 
+}
+
+
+
 function try_eval(input){
  
     try {
@@ -23,6 +32,7 @@ function try_eval(input){
 
 
 window.appData = {};
+appData = window.appData;
 global.updateAppData = function(name,val){
   window.appData[name] = val;
 }
@@ -296,21 +306,23 @@ global.try_eval = function(input){
 
    renderElement(name,int, childrenAdditionalStyles, clickfunctions){
     var that = this;
-    console.log(that.state.pages[that.state.page].childrenAdditionalStyles[int])
-    
+   
+   
+
     int = parseInt(int)
+    var additionalStyle = {};
+
+    Object.keys(that.state.pages[this.state.page].childrenAdditionalStyles[int]).forEach(function(key){
+      additionalStyle[key] = unwrap_dynamically(that.state.pages[that.state.page].childrenAdditionalStyles[int][key])
+    })
+
     if(name === "text"){
   
       return (
         <Text
-          className = "input_class"
-          ref={component => this._element = component}
-          defaultValue = "Heren"
-          style={[{position:'absolute',top:0,left:0, width:"100%", backgroundColor:'white', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
-          maxLength = {5}
+          style={[{position:'absolute',top:0,left:0, width:"100%", backgroundColor:'white', borderColor: 'gray', borderWidth: 1}, additionalStyle]}
           onPress = { function(){if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
-          selectable = {true}
         >{  try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) === undefined ? ("undefined"):  try_eval(that.state.pages[that.state.page].childrenAdditionalStyles[int].innerText) }</Text>
 
         )
@@ -329,7 +341,7 @@ global.try_eval = function(input){
    return(
       <Picker
         selectedValue={window.appData["input" + int]}
-        style = {[{height:50,width:150}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        style = {[{height:50,width:150}, additionalStyle]}
         onValueChange = { function(value){  eval('(' + that.state.pages[that.state.page].clickfunctions[int] !== undefined ? that.state.pages[that.state.page].clickfunctions[int]:"function(){}" + ')()'); window.updateAppData(that.state.page + 'picker' + int, value);  if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
       >
         <Picker.Item label={"Select"} value={"Select"} />
@@ -351,7 +363,7 @@ global.try_eval = function(input){
 
       return(
       <Multiplier
-      style = {[{height:"60%", alignItems:'center'}, that.state.pages[that.state.page].childrenAdditionalStyles[int], {height:"60%", alignItems:'center'}]}
+      style = {[{height:"60%", alignItems:'center'}, additionalStyle, {height:"60%", alignItems:'center'}]}
       type = {that.state.pages[that.state.page].childrenAdditionalStyles[int]["repeaterType"] === undefined ? ("text"): (that.state.pages[that.state.page].childrenAdditionalStyles[int]["repeaterType"]) }
       data = {options}
       int = {int}
@@ -369,7 +381,7 @@ global.try_eval = function(input){
         onPress = { function(){ if(window.edit_mode){  window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
         >
           <Image
-            style={[{ width:"50%", height:"50%"}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+            style={[{ width:"50%", height:"50%"}, additionalStyle]}
             source = {{uri:uri}}
           >
           </Image>
@@ -381,7 +393,7 @@ global.try_eval = function(input){
      
       return(
       <TextInput
-        style={[{position:'absolute',top:0,left:0, height: 40, width:"50%", borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+        style={[{position:'absolute',top:0,left:0, height: 40, width:"50%", borderColor: 'gray', borderWidth: 1}, additionalStyle]}
         onChangeText={function(val){window.updateAppData(that.state.page + "input" + int,val); that.forceUpdate(); }}
         value={window.appData["input" + int]}
         onFocus = {function(){ if(window.drag_mode){that.setState({selectedElemToStyle:int})} if(window.edit_mode){window.edit(int)}  } }
@@ -407,7 +419,7 @@ global.try_eval = function(input){
             alignItems: 'center',
             flexDirection: 'row',
             borderRadius:15, borderWidth: 1,
-            position:'absolute',top:0,left:0, height: "7%", title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+            position:'absolute',top:0,left:0, height: "7%", title:'Test', borderColor: 'gray', borderWidth: 1}, additionalStyle]}
         ><Text> { that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] === undefined ? ("undefined"):that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] }</Text> 
         </TouchableOpacity>
       )
@@ -420,7 +432,7 @@ global.try_eval = function(input){
           ref={component => this._element = component}
           onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){  window.edit(int); return}  eval('(' + that.state.pages[that.state.page].clickfunctions[int] + ')()'); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
-          style={[{zIndex:-100, position:'absolute',top:0,left:0, height: 40, width:"10%", title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.childrenAdditionalStyles[int]]}
+          style={[{zIndex:-100, position:'absolute',top:0,left:0, height: 40, width:"10%", title:'Test', borderColor: 'gray', borderWidth: 1},additionalStyle]}
         > 
         </TouchableOpacity>
 
@@ -548,16 +560,8 @@ global.try_eval = function(input){
 
               other_pages[page.page] = page;
             })
-
-             
-      
               window.appData = res[0].appdata;
-
-           
               that.setState({pages: other_pages})
-             
-            
-            
 
             } catch(e){
               console.log(e)
