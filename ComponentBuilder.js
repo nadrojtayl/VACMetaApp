@@ -709,9 +709,14 @@ global.try_eval = function(input){
    
 
       return (
-        <View style = {[{height:"100%", paddingTop:"10%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
+        <View style = {[{height:"100%", marginTop:"10%", width:"100%", borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
         {
           that.state.pages[that.state.page].children.map(function(elem_name,index){
+            console.log(elem_name);
+            console.log(that.state.pages[that.state.page].childrenAdditionalStyles[index].innerText)
+          if(elem_name === "text" && (that.state.pages[that.state.page].childrenAdditionalStyles[index].innerText === "" || that.state.pages[that.state.page].childrenAdditionalStyles[index].innerText === undefined || that.state.pages[that.state.page].childrenAdditionalStyles[index].innerText === null) ){
+            return
+          }
           return that.renderElement(elem_name, index)
         })
       }
