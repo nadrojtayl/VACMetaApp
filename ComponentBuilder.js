@@ -105,7 +105,7 @@ global.try_eval = function(input){
          style={[{ height: 40, borderColor: 'gray', borderWidth: 1}, additionalStyle]}
           key = {int}
           onPress = { function(){  eval('(' + that.props.clickfunction + ')()')   } }
-    >{  additionalStyle.innerText === undefined ? elem:additionalStyle.innerText }</Text>
+    >{  additionalStyle.innerText === undefined ? "example" :additionalStyle.innerText }</Text>
 
         )
     }
@@ -223,6 +223,8 @@ global.try_eval = function(input){
         editmode:true, 
         color: "white",
         name: undefined,
+        dbLinks:{},
+        loaded:false,
         enteredName:"",
         ischildview: false,
         text_mode:false,
@@ -452,6 +454,24 @@ global.try_eval = function(input){
     }
   }
 
+  connectToDatabase(db_link,name){
+
+      var that = this;
+      that.state.dbLinks[name] = db_link;
+      var schema = fetch(db_link, {
+                  method: 'GET',
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                  }
+        }).then(async function(res){
+          res = await res.json();
+          window[name] = res;
+          that.forceUpdate();
+          that.setState({dbLinks:that.state.dbLinks, loaded:true})
+        })
+    }
+
   
   
 
@@ -475,7 +495,7 @@ global.try_eval = function(input){
          
             res= await res.json();
          
-              
+            console.log(res);
             if(res.length === 0){
               alert("Couldn't find your app. Please refresh the page")
               that.setState({name:undefined});
@@ -487,7 +507,16 @@ global.try_eval = function(input){
             var firstpagestyle;
             var clickfunctions;
             var pages = {};
-            console.log(JSON.stringify(res));
+            if(res[0].databases){
+               var databases = JSON.parse(res[0].databases);
+            } else {
+                var databases = {};
+            }
+          
+            var loaded = (Object.keys(databases).length === 0);
+            Object.keys(databases).forEach(function(db_name){
+              that.connectToDatabase.bind(that)(databases[db_name],db_name);
+            })
 
 
             if(res.forEach === undefined){
@@ -561,7 +590,8 @@ global.try_eval = function(input){
               other_pages[page.page] = page;
             })
               window.appData = res[0].appdata;
-              that.setState({pages: other_pages})
+              console.log(databases);
+              that.setState({pages: other_pages, loaded:loaded, dbLinks:databases, color: res.color})
 
             } catch(e){
               console.log(e)
@@ -578,6 +608,7 @@ global.try_eval = function(input){
 
     render(){
       var that = this;
+
       if(that.state.name === undefined){
         return (
         <View style = {[{height:"100%", width:"100%",  borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
@@ -595,6 +626,14 @@ global.try_eval = function(input){
           }}></Button>
         </View>
       )
+    }
+
+    if(!that.state.loaded){
+      return (
+        <View style = {[{height:"100%", paddingTop:"10%", width:"100%", alignItems:'center', justifyContent:'center', borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
+          <Text style = {{textAlign:'center'}}>LOADING</Text>
+        </View>
+        )
     }
    
 
