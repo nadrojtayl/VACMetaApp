@@ -522,11 +522,11 @@ global.try_eval = function(input){
                   }
 
                   if(key === "top"){
-                    styleobj[key] = (styleobj[key]/500 * height)
+                    styleobj[key] = (styleobj[key]/590 * height)
                   }
 
                   if(key === "left"){
-                    styleobj[key] = (styleobj[key]/354 * width)
+                    styleobj[key] = (styleobj[key]/394 * width)
                   }
 
                 })
