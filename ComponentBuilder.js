@@ -352,6 +352,19 @@ global.try_eval = function(input){
       additionalStyle[key] = unwrap_dynamically(that.state.pages[that.state.page].childrenAdditionalStyles[int][key])
     })
 
+    if(name === "webview"){
+      return (
+        <View style={[{position:'absolute',top:0,left:0, width:"100%", color:'black',  borderColor: 'gray', borderWidth: 1}, additionalStyle]} >
+          <WebView
+            source={{
+              uri: additionalStyle.uri
+            }} 
+          />
+        </View>
+
+        )
+    }
+
     if(name === "switch"){
 
       return (
