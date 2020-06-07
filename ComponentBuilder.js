@@ -92,32 +92,34 @@ global.try_eval = function(input){
 
       return (
         <Text
-     
-          ref={component => this._element = component}
-       
-          style={[{ height: 40, borderColor: 'gray', borderWidth: 1}, additionalStyle]}
-          maxLength = {5}
+         style={[{ height: 40, borderColor: 'gray', borderWidth: 1}, additionalStyle]}
           key = {int}
           onPress = { function(){  eval('(' + that.props.clickfunction + ')()')   } }
-          textTreeNode = {this.state.textTreeChildren[int]}
-          selectable = {true}
-        >{  additionalStyle.innerText === undefined ? elem:additionalStyle.innerText }</Text>
+    >{  additionalStyle.innerText === undefined ? elem:additionalStyle.innerText }</Text>
 
         )
     }
 
 
     if(name === "button"){
+
       return(
-       <Button
-          className = "input_class"
-          ref={component => this._element = component}
-          onPress = { function(){  eval('(' + that.prop.clickfunction + ')()')   } }
-          title = {additionalStyle['title'] === undefined ? ("undefined"):additionalStyle['title']}
+          <TouchableOpacity
+         
+         onPress = { function(){  eval('(' + that.prop.clickfunction + ')()')   } }
           key = {int}
-          textTreeNode = {this.state.textTreeChildren[int]}
-          style={[{ height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, additionalStyle[int]]}
-        >{ additionalStyle['innerText'] === undefined ? ("undefined"):additionalStyle['innerText'] }</Button>
+          style={[{
+             shadowOffset: { height: 1, width: 1 }, // IOS
+            shadowOpacity: 1, // IOS
+            shadowRadius: 1, //IOS
+            backgroundColor: '#fff',
+            elevation: 2, // Android
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+            backgroundColor:'red', height: "25%", borderColor: 'gray', borderRadius:10, borderWidth: 1}, additionalStyle]}
+        ><Text> { additionalStyle['innerText'] === undefined ? ("undefined"):additionalStyle['innerText']  }</Text> 
+        </TouchableOpacity>
      
       )
     }
@@ -349,8 +351,8 @@ global.try_eval = function(input){
 
       return(
       <Multiplier
-      style = {[{alignItems:'center'}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
-      type = {that.state.pages[that.state.page].childrenAdditionalStyles[int]["style:repeaterType"] === undefined ? ("text"): (that.state.pages[that.state.page].childrenAdditionalStyles[int]["style:repeaterType"]) }
+      style = {[{height:"60%", alignItems:'center'}, that.state.pages[that.state.page].childrenAdditionalStyles[int], {height:"60%", alignItems:'center'}]}
+      type = {that.state.pages[that.state.page].childrenAdditionalStyles[int]["repeaterType"] === undefined ? ("text"): (that.state.pages[that.state.page].childrenAdditionalStyles[int]["repeaterType"]) }
       data = {options}
       int = {int}
       parent = {that}
@@ -390,11 +392,22 @@ global.try_eval = function(input){
     if(name === "button"){
       return(
        <TouchableOpacity
-          className = "input_class"
-          ref={component => this._element = component}
+         
           onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
-          style={[{position:'absolute',top:0,left:0, height: 40, title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
+          style={[{
+             shadowOffset: { height: 1, width: 1 }, // IOS
+            shadowOpacity: 1, // IOS
+            shadowRadius: 1, //IOS
+            backgroundColor: '#fff',
+            elevation: 2, // Android
+            height: 50,
+            width: 100,
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+            borderRadius:15, borderWidth: 1,
+            position:'absolute',top:0,left:0, height: "7%", title:'Test', borderColor: 'gray', borderWidth: 1}, that.state.pages[that.state.page].childrenAdditionalStyles[int]]}
         ><Text> { that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] === undefined ? ("undefined"):that.state.pages[that.state.page].childrenAdditionalStyles[int]['innerText'] }</Text> 
         </TouchableOpacity>
       )
