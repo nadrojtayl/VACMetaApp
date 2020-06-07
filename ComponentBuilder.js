@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Picker, Image, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
+import { Button, Picker, Image,ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
 
 
 const width = Dimensions.get('window').width;
@@ -619,7 +619,7 @@ global.try_eval = function(input){
             onChangeText={function(enteredName){that.setState({enteredName})}}
             value={that.state.enteredName}
           />
-          <Button title = "Go" onPress = {function(){
+          <Button title = "Test My App" onPress = {function(){
             that.setState({name:that.state.enteredName},function(){
               that.load();
             })
@@ -631,7 +631,7 @@ global.try_eval = function(input){
     if(!that.state.loaded){
       return (
         <View style = {[{height:"100%", paddingTop:"10%", width:"100%", alignItems:'center', justifyContent:'center', borderRadius:window.app_name === undefined ? 10:0, paddingTop:'5%', backgroundColor:that.state.color},this.state.additionalStyle]}>
-          <Text style = {{textAlign:'center'}}>LOADING</Text>
+          <ActivityIndicator size="large" color="#0000ff" />
         </View>
         )
     }
