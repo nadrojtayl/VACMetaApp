@@ -520,6 +520,15 @@ global.try_eval = function(input){
                   if(key === "fontFamily" && typeof styleobj[key] === "number"){
                     delete styleobj["fontFamily"]
                   }
+
+                  if(key === "top"){
+                    styleobj[key] = (styleobj[key]/500 * height)
+                  }
+
+                  if(key === "left"){
+                    styleobj[key] = (styleobj[key]/354 * width)
+                  }
+
                 })
               })
             }
@@ -531,6 +540,7 @@ global.try_eval = function(input){
              if(typeof page.app_children === "string"){
               page.children = JSON.parse(page.app_children)
             }
+
 
              if(typeof page.appdata === "string"){
                 page.appdata = JSON.parse(page.appdata)
