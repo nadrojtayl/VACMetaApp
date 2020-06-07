@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Picker, Image,ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
+import { Button, Picker, Switch, Image,ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, Text, View, TextInput, Dimensions } from "react-native";
 
 
 const width = Dimensions.get('window').width;
