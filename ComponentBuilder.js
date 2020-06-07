@@ -352,9 +352,19 @@ global.try_eval = function(input){
       additionalStyle[key] = unwrap_dynamically(that.state.pages[that.state.page].childrenAdditionalStyles[int][key])
     })
 
-    if(name === "webview"){
+    if(name === "map"){
+      if(additionalStyle.uri === undefined){
+        return(<TouchableOpacity
+          onPress = {function(){}}
+          key = {int}
+          style={[{zIndex:-100, position:'absolute',top:0,left:0, height: "50%", width:"50%", backgroundColor:'red', title:'Test', borderColor: 'gray', borderWidth: 1, alignItems:'center',textAlign:'center'}, additionalStyle]}
+        >
+          <Text>Your map uri is not set.</Text>
+        </TouchableOpacity>)
+      }
+
       return (
-        <View style={[{position:'absolute',top:0,left:0, width:"100%", color:'black',  borderColor: 'gray', borderWidth: 1}, additionalStyle]} >
+        <View style={[{position:'absolute',top:0,left:0, width:"100%", height:"50%", color:'black',  borderColor: 'gray', borderWidth: 1}, additionalStyle]} >
           <WebView
             source={{
               uri: additionalStyle.uri
