@@ -10,6 +10,17 @@ global.inputs = {
 
 window = global;
 
+function filter(arr,phrase){
+  return arr.filter(function(elem){
+    return elem.indexOf(phrase) !== -1;
+  })
+}
+
+function clone(arr){
+  return arr.slice();
+}
+
+
 function unwrap_dynamically(value,default_value){
   if(default_value === undefined){
     default_value = "undefined"
@@ -242,6 +253,29 @@ global.try_eval = function(input){
         childrenAdditionalStyles:childrenAdditionalStyles}
     }
 
+
+    sendToDatabase(name,obj){
+      var that = this;
+      var arr = that.state.dbLinks[name].split("/");
+      var id = arr[arr.length - 1]
+      var url = "https://sheetsu.com/apis/v1.0db/" + id;
+      console.log(url);
+      var schema = fetch(url, {
+                  method: 'POST',
+                  body:JSON.stringify(obj),
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                  }
+        }).then(async function(res){
+          console.log("SAVED");
+          window[name].push(obj);
+          that.forceUpdate();
+
+
+        })
+    }
+
     async loadDatabase(){
        var that = this;
        var db_url = "https://streamedbooks.herokuapp.com/apps_data?app_name=" + this.state.name
@@ -317,6 +351,21 @@ global.try_eval = function(input){
     Object.keys(that.state.pages[this.state.page].childrenAdditionalStyles[int]).forEach(function(key){
       additionalStyle[key] = unwrap_dynamically(that.state.pages[that.state.page].childrenAdditionalStyles[int][key])
     })
+
+    if(name === "switch"){
+
+      return (
+        <Switch
+          
+          style={[{position:'absolute',top:0,left:0, width:"100%", color:'black',  borderColor: 'gray', borderWidth: 1}, additionalStyle]} 
+          onValueChange={function(val){window.updateAppData(that.state.page + "switch" + int,val); that.forceUpdate(); eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate(); window.updateAppData(); }    }}
+          value={window.appData[that.state.page + "switch" + int]}
+          key = {int}
+        ></Switch>
+
+        )
+    }
+
 
     if(name === "text"){
   
@@ -396,9 +445,8 @@ global.try_eval = function(input){
       return(
       <TextInput
         style={[{position:'absolute',top:0,left:0, height: 40, width:"50%", borderColor: 'gray', borderWidth: 1}, additionalStyle]}
-        onChangeText={function(val){window.updateAppData(that.state.page + "input" + int,val); that.forceUpdate(); }}
+        onChangeText={function(val){window.updateAppData(that.state.page + "input" + int,val); that.forceUpdate();  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()} }}
         value={window.appData["input" + int]}
-        onFocus = {function(){ if(window.drag_mode){that.setState({selectedElemToStyle:int})} if(window.edit_mode){window.edit(int)}  } }
       />
       )
     }
@@ -407,7 +455,7 @@ global.try_eval = function(input){
       return(
        <TouchableOpacity
          
-          onPress = { function(){ if(window.drag_mode){ that.setState({selectedElemToStyle:int});  return} if(window.edit_mode){ window.edit(int); return}  eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
+          onPress = { function(){ eval(that.state.pages[that.state.page].clickfunctions[int]); if(that.state.pages[that.state.page].clickfunctions[int].indexOf("appData") !== -1){ that.forceUpdate()}   } }
           key = {int}
           style={[{
              shadowOffset: { height: 1, width: 1 }, // IOS
